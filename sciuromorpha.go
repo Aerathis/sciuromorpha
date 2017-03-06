@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	git "github.com/Aerathis/sciuromorpha/lib"
+	git "git.ripostegames.com/sciuromorpha/lib"
 )
 
 var tag = flag.String("tag", "", "Git tag to checkout")
