@@ -37,7 +37,7 @@ func (gc *GitClient) CheckoutTag(tag string) (err error) {
 	}
 	defer odb.Free()
 
-	var t *git.Tag
+	t := &git.Tag{}
 	odb.ForEach(func(oid *git.Oid) error {
 		obj, err := gc.repository.Lookup(oid)
 		if err != nil {
