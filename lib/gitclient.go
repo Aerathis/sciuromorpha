@@ -19,6 +19,7 @@ func OpenRepository(path string) (gc *GitClient, err error) {
 	if err != nil {
 		return nil, err
 	}
+	gc = &GitClient{}
 	gc.repository = repo
 	return
 }
