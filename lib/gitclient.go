@@ -70,7 +70,7 @@ type sparseEntries []string
 
 func (se sparseEntries) contains(i string) bool {
 	for _, v := range se {
-		if v == i {
+		if v == i || v == i+string(os.PathSeparator) {
 			return true
 		}
 	}
@@ -146,23 +146,30 @@ func (gc *GitClient) CheckoutTag(tag string) (err error) {
 	if err != nil {
 		return err
 	}
-	workPath = dirpath.Join(workPath, g.Name())
-	info, err := getFileInfoByName(workPath, "info")
-	if err != nil {
-		return err
-	}
-	workPath = dirpath.Join(workPath, info.Name())
 
 	sparseFlag := true
-	sparse, err := getFileInfoByName(workPath, "sparse-checkout")
+	workPath = dirpath.Join(workPath, g.Name())
+	info, err := getFileInfoByName(workPath, "info")
 	if err != nil {
 		if err.Error() != "ERRNF" {
 			return err
 		}
 		sparseFlag = false
 	}
+	workPath = dirpath.Join(workPath, info.Name())
 
+	var sparse os.FileInfo
 	if sparseFlag {
+		sparse, err = getFileInfoByName(workPath, "sparse-checkout")
+		if err != nil {
+			if err.Error() != "ERRNF" {
+				return err
+			}
+			sparseFlag = false
+		}
+	}
+
+	if sparseFlag && sparse != nil {
 		workPath = dirpath.Join(workPath, sparse.Name())
 		sparseData, err := ioutil.ReadFile(workPath)
 		if err != nil {
@@ -176,7 +183,7 @@ func (gc *GitClient) CheckoutTag(tag string) (err error) {
 
 		for _, v := range dirContents {
 			if !sparses.contains(v.Name()) && !isHidden(v.Name()) {
-				err = os.Remove(dirpath.Join(gc.repoPath, v.Name()))
+				err = os.RemoveAll(dirpath.Join(gc.repoPath, v.Name()))
 				if err != nil {
 					return err
 				}
@@ -184,5 +191,5 @@ func (gc *GitClient) CheckoutTag(tag string) (err error) {
 		}
 	}
 
-	return
+	return nil
 }
