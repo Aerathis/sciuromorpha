@@ -5,8 +5,6 @@ go:
 
 before_install:
   - go get github.com/mattn/goveralls
-
-before_script:
   - cd $GOPATH/src/github.com/Aerathis/sciuromorpha/vendor/github.com/libgit2/git2go && git submodule update --init && make install
   
 script:
