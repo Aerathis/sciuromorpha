@@ -1,11 +1,16 @@
+dist: trusty
+sudo: required
 language: go
 
 go:
   1.7.4
 
 before_install:
+  - wget https://github.com/libgit2/libgit2/archive/v0.24.6.tar.gz
+  - tar zxvf v0.24.6.tar.gz && cd libgit2-0.24.6 && mkdir build && cd build && cmake .. && sudo cmake --build . --target install
+  - sudo ln -s /usr/local/lib/libgit2.so.24 /lib/libgit2.so.24
   - go get github.com/mattn/goveralls
-  - go get -d github.com/libgit2/git2go && cd $GOPATH/src/github.com/libgit2/git2go && git submodule update --init && make install
+  - go get gopkg.in/libgit2/git2go.v24
   
 script:
   - cd $GOPATH/src/github.com/Aerathis/sciuromorpha && $HOME/gopath/bin/goveralls -service=travis-ci
