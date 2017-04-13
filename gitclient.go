@@ -190,6 +190,5 @@ func (gc *GitClient) CheckoutTag(tag string) (err error) {
 			}
 		}
 	}
-
 	return nil
 }
