@@ -1,0 +1,7 @@
+{
+    "dependencies": {
+        "github.com/libgit2/git2go": {
+            "branch": "master"
+        }
+    }
+}

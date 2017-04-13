@@ -1,0 +1,13 @@
+{
+    "memo": "4fdade734be563d379c1948828e7043656bc1a126d436a01e0cc1c8d10f73315",
+    "projects": [
+        {
+            "name": "github.com/libgit2/git2go",
+            "branch": "master",
+            "revision": "97f1722244c1888fcf231bdffb60edd6c04ff9dc",
+            "packages": [
+                "."
+            ]
+        }
+    ]
+}

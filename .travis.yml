@@ -4,9 +4,11 @@ go:
   1.7.4
 
 before_install:
-  - go get -d github.com/libgit2/git2go && cd $GOPATH/src/github.com/libgit2/git2go && git submodule update --init && make install
   - go get github.com/mattn/goveralls
 
+before_script:
+  - cd $GOPATH/src/github.com/Aerathis/sciuromorpha/vendor/github.com/libgit2/git2go && git submodule update --init && make install
+  
 script:
   - $HOME/gopath/bin/goveralls -service=travis-ci
 
