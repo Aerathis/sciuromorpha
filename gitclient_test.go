@@ -63,6 +63,14 @@ func createLocalDir(name string) (string, error) {
 	return result, err
 }
 
+func initRepo(path string) (*git.Repository, error) {
+	return git.InitRepository(path, false)
+}
+
+func openRepo(path string) *GitClient {
+	return &GitClient{}
+}
+
 func TestFree(t *testing.T) {
 	testClient.Free()
 	if testHook != "Free called" {

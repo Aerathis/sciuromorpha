@@ -35,76 +35,14 @@ type GitClient struct {
 	sshPath    string
 }
 
-type gitterImpl struct {
-	r *git.Repository
-}
-
-func (g *gitterImpl) Free() {
-	g.r.Free()
-}
-
-func (g *gitterImpl) RemotesLookup(n string) (Fetcher, error) {
-	return g.r.Remotes.Lookup(n)
-}
-
-func (g *gitterImpl) GetTag(tag string) (*git.Tag, error) {
-	odb, err := g.r.Odb()
-	if err != nil {
-		return nil, err
-	}
-	defer odb.Free()
-
-	var t *git.Tag
-	odb.ForEach(func(oid *git.Oid) error {
-		obj, err := g.r.Lookup(oid)
-		if err != nil {
-			return err
-		}
-		tObj, err := obj.AsTag()
-		if err == nil {
-			if tObj.Name() == tag {
-				t = tObj
-			}
-		}
-		return nil
-	})
-	return t, err
-}
-
-func (g *gitterImpl) CheckoutTree(t *git.Tag, tag string, o *git.CheckoutOpts) error {
-	tagCommit, err := t.Target().AsCommit()
-	if err != nil {
-		return err
-	}
-	defer tagCommit.Free()
-
-	tree, err := tagCommit.Tree()
-	if err != nil {
-		return err
-	}
-	defer tree.Free()
-
-	err = g.r.CheckoutTree(tree, checkoutOpts)
-	if err != nil {
-		return err
-	}
-
-	err = g.r.SetHead("refs/tags/" + tag)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // OpenRepository opens a reference to a git repository at the given path
-func OpenRepository(path, sshpath string) (gc *GitClient, err error) {
+func OpenRepository(path, sshpath string, gitFunc func(*git.Repository) Gitter) (gc *GitClient, err error) {
 	repo, err := git.OpenRepository(path)
 	if err != nil {
 		return nil, err
 	}
 	gc = &GitClient{}
-	gi := &gitterImpl{repo}
-	gc.repository = gi
+	gc.repository = gitFunc(repo)
 	gc.repoPath = path
 	gc.sshPath = sshpath
 	return
