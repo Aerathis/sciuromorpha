@@ -67,8 +67,18 @@ func initRepo(path string) (*git.Repository, error) {
 	return git.InitRepository(path, false)
 }
 
-func openRepo(path string) *GitClient {
-	return &GitClient{}
+func openRepo(path, sshpath string) (*GitClient, error) {
+	p, err := createLocalDir(path)
+	if err != nil {
+		return nil, err
+	}
+	_, err = initRepo(p)
+	if err != nil {
+		return nil, err
+	}
+	return OpenRepository(path, sshpath, func(g *git.Repository) Gitter {
+		return &testGitter{}
+	})
 }
 
 func TestFree(t *testing.T) {
@@ -168,21 +178,15 @@ func TestGetFetchOptsCertificateCheckCallback(t *testing.T) {
 }
 
 func TestCheckoutTagNoSparse(t *testing.T) {
-	testDir, err := createLocalDir("testing")
-	defer os.RemoveAll(testDir)
+	testClient, err := openRepo("testing", "")
+	defer os.RemoveAll("testing")
 	if err != nil {
 		t.Error(err)
 	}
-
-	err = os.Mkdir(path.Join(testDir, ".git"), os.ModeDir|os.ModePerm)
-	if err != nil {
-		t.Error(err)
-	}
-
-	testClient.repoPath = testDir
 
 	err = testClient.CheckoutTag("test")
 	if err != nil {
+		t.Log(err)
 		t.Fail()
 	}
 }
