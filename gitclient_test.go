@@ -3,6 +3,7 @@ package sciuromorpha
 import (
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	git "gopkg.in/libgit2/git2go.v24"
@@ -11,7 +12,9 @@ import (
 var se = sparseEntries([]string{"first", "second", "third"})
 var testHook string
 
-type testFetcher struct{}
+type testFetcher struct {
+	Fail bool
+}
 
 func (tf testFetcher) Fetch([]string, *git.FetchOptions, string) error {
 	return nil
@@ -20,7 +23,12 @@ func (tf testFetcher) Fetch([]string, *git.FetchOptions, string) error {
 func (tf testFetcher) Free() {
 }
 
-type testGitter struct{}
+type testGitter struct {
+	FailRemote bool
+	FailFetch  bool
+	MissingTag bool
+	FailTree   bool
+}
 
 func (tg *testGitter) Free() {
 	testHook = "Free called"
@@ -53,6 +61,13 @@ func createLocalDir(name string) (string, error) {
 	result := path.Join(d, name)
 	err = os.Mkdir(result, os.ModeDir|os.ModePerm)
 	return result, err
+}
+
+func TestFree(t *testing.T) {
+	testClient.Free()
+	if testHook != "Free called" {
+		t.Fail()
+	}
 }
 
 func TestSparseEntriesDoesContain(t *testing.T) {
@@ -194,6 +209,17 @@ func TestCheckoutTagNoRepoPathSet(t *testing.T) {
 		t.Fail()
 	}
 	if err.Error() != "ERRNF" {
+		t.Fail()
+	}
+}
+
+func TestCheckoutTagRepoPathNotExist(t *testing.T) {
+	testClient.repoPath = "/directorycertainlydoesntexist"
+	err := testClient.CheckoutTag("test")
+	if err == nil {
+		t.Fail()
+	}
+	if !strings.Contains(err.Error(), "no such file or directory") {
 		t.Fail()
 	}
 }
